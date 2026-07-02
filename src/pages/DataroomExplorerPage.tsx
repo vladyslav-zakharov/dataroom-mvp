@@ -5,7 +5,13 @@ import { Button } from '@/components/ui/button'
 import ExplorerBreadcrumb from '@/components/explorer/ExplorerBreadcrumb'
 import ExplorerGrid from '@/components/explorer/ExplorerGrid'
 import CreateFolderDialog from '@/components/explorer/CreateFolderDialog'
+import RenameNodeDialog from '@/components/explorer/RenameNodeDialog'
+import DeleteNodeDialog from '@/components/explorer/DeleteNodeDialog'
+import UploadButton from '@/components/explorer/UploadButton'
+import DropZone from '@/components/explorer/DropZone'
+import PDFViewerDialog from '@/components/viewer/PDFViewerDialog'
 import { useDataroomStore } from '@/store/useDataroomStore'
+import type { DataroomNode, FolderNode, FileNode } from '@/types'
 
 const DataroomExplorerPage: FC = () => {
   const { dataroomId, folderId } = useParams<{
@@ -20,10 +26,16 @@ const DataroomExplorerPage: FC = () => {
   const getPath = useDataroomStore((s) => s.getPath)
 
   const [createFolderOpen, setCreateFolderOpen] = useState(false)
+  const [renameNode, setRenameNode] = useState<DataroomNode | null>(null)
+  const [deleteNode, setDeleteNode] = useState<DataroomNode | null>(null)
+  const [viewFile, setViewFile] = useState<FileNode | null>(null)
 
-  // Close dialogs when navigating between folders in the same route pattern
+  // Close all dialogs when navigating between folders in the same route pattern
   useEffect(() => {
     setCreateFolderOpen(false)
+    setRenameNode(null)
+    setDeleteNode(null)
+    setViewFile(null)
   }, [dataroomId, folderId])
 
   // Resolve the dataroom — show a not-found state if missing
@@ -87,13 +99,19 @@ const DataroomExplorerPage: FC = () => {
   // Current folder's children (folders first, then files, alphabetical per group)
   const children = getChildren(dataroomId!, parentId)
 
+  const handleFolderRename = (node: FolderNode) => setRenameNode(node)
+  const handleFolderDelete = (node: FolderNode) => setDeleteNode(node)
+  const handleFileRename = (node: FileNode) => setRenameNode(node)
+  const handleFileDelete = (node: FileNode) => setDeleteNode(node)
+  const handleFileClick = (node: FileNode) => setViewFile(node)
+
   return (
     <>
       <div className="mb-4">
         <ExplorerBreadcrumb dataroom={dataroom} path={path} />
       </div>
 
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">
             {path.length > 0 ? path[path.length - 1].name : dataroom.name}
@@ -104,26 +122,45 @@ const DataroomExplorerPage: FC = () => {
             <PlusIcon className="h-4 w-4" aria-hidden="true" />
             New Folder
           </Button>
-          {/* Seam: UploadButton from the next stage mounts here */}
+          <UploadButton dataroomId={dataroomId!} parentId={parentId} />
         </div>
       </div>
 
-      <ExplorerGrid
-        dataroomId={dataroomId!}
-        nodes={children}
-        // Seams for PDF viewer + rename/delete — wired in the next stage:
-        // onFileClick={(node) => openPDFViewer(node)}
-        // onFolderRename={(node) => openRenameDialog(node)}
-        // onFolderDelete={(node) => openDeleteDialog(node)}
-        // onFileRename={(node) => openRenameDialog(node)}
-        // onFileDelete={(node) => openDeleteDialog(node)}
-      />
+      <DropZone dataroomId={dataroomId!} parentId={parentId}>
+        <ExplorerGrid
+          dataroomId={dataroomId!}
+          nodes={children}
+          onFileClick={handleFileClick}
+          onFolderRename={handleFolderRename}
+          onFolderDelete={handleFolderDelete}
+          onFileRename={handleFileRename}
+          onFileDelete={handleFileDelete}
+        />
+      </DropZone>
 
       <CreateFolderDialog
         open={createFolderOpen}
         onOpenChange={setCreateFolderOpen}
         dataroomId={dataroomId!}
         parentId={parentId}
+      />
+
+      <RenameNodeDialog
+        open={renameNode !== null}
+        onOpenChange={(open) => { if (!open) setRenameNode(null) }}
+        node={renameNode}
+      />
+
+      <DeleteNodeDialog
+        open={deleteNode !== null}
+        onOpenChange={(open) => { if (!open) setDeleteNode(null) }}
+        node={deleteNode}
+      />
+
+      <PDFViewerDialog
+        open={viewFile !== null}
+        onOpenChange={(open) => { if (!open) setViewFile(null) }}
+        node={viewFile}
       />
     </>
   )

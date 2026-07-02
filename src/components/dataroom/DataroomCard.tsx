@@ -7,7 +7,6 @@ import { useState, type FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MoreHorizontalIcon, PencilIcon, Trash2Icon, DatabaseIcon } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -18,6 +17,7 @@ import {
 import RenameDataroomDialog from '@/components/dataroom/RenameDataroomDialog'
 import DeleteDataroomDialog from '@/components/dataroom/DeleteDataroomDialog'
 import { useDataroomStore } from '@/store/useDataroomStore'
+import { cn } from '@/lib/utils'
 import type { Dataroom } from '@/types'
 
 interface Props {
@@ -63,9 +63,13 @@ const DataroomCard: FC<Props> = ({ dataroom }) => {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
+                  <button
+                    type="button"
+                    className={cn(
+                      'inline-flex size-7 items-center justify-center rounded-[min(var(--radius-md),12px)]',
+                      'text-muted-foreground hover:bg-muted hover:text-foreground',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    )}
                     aria-label={`Actions for ${dataroom.name}`}
                     onClick={(e) => e.stopPropagation()}
                   />
