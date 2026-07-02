@@ -2,7 +2,7 @@
  * Dialog for renaming a folder or file within the explorer.
  * Shared by both FolderCard and FileCard action menus.
  */
-import { useState, useEffect, type FC } from 'react'
+import { useState, useEffect, useCallback, type FC } from 'react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -27,7 +27,6 @@ const RenameNodeDialog: FC<Props> = ({ open, onOpenChange, node }) => {
   const renameNode = useDataroomStore((s) => s.renameNode)
   const [name, setName] = useState('')
   const [error, setError] = useState<string | undefined>()
-  const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     if (open && node) {
@@ -36,15 +35,14 @@ const RenameNodeDialog: FC<Props> = ({ open, onOpenChange, node }) => {
     }
   }, [open, node])
 
-  const handleOpenChange = (next: boolean) => {
+  const handleOpenChange = useCallback((next: boolean) => {
     if (!next) setError(undefined)
     onOpenChange(next)
-  }
+  }, [onOpenChange])
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!node) return
     setError(undefined)
-    setBusy(true)
     try {
       renameNode(node.id, name)
       const label = node.type === 'folder' ? 'Folder' : 'File'
@@ -62,10 +60,8 @@ const RenameNodeDialog: FC<Props> = ({ open, onOpenChange, node }) => {
       } else {
         setError('An unexpected error occurred.')
       }
-    } finally {
-      setBusy(false)
     }
-  }
+  }, [node, name, renameNode, handleOpenChange])
 
   const label = node?.type === 'folder' ? 'Folder' : 'File'
   const unchanged = name.trim() === node?.name.trim()
@@ -84,7 +80,6 @@ const RenameNodeDialog: FC<Props> = ({ open, onOpenChange, node }) => {
           }}
           error={error}
           placeholder={`${label} name`}
-          disabled={busy}
           onEnter={handleSubmit}
           autoFocus
         />
@@ -92,7 +87,7 @@ const RenameNodeDialog: FC<Props> = ({ open, onOpenChange, node }) => {
           <Button
             variant="default"
             onClick={handleSubmit}
-            disabled={busy || name.trim().length === 0 || unchanged}
+            disabled={name.trim().length === 0 || unchanged}
           >
             Save
           </Button>

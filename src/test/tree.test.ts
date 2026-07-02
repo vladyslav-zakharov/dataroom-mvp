@@ -62,18 +62,19 @@ describe('resolveUploadName', () => {
   })
 
   it('appends (1) when the base name is taken', () => {
-    const result = resolveUploadName('Report', new Set(['Report']))
+    // siblingNames returns lowercased names — match that contract
+    const result = resolveUploadName('Report', new Set(['report']))
     expect(result).toBe('Report (1)')
   })
 
   it('appends (2) when both Report and Report (1) are taken', () => {
-    const result = resolveUploadName('Report', new Set(['Report', 'Report (1)']))
+    const result = resolveUploadName('Report', new Set(['report', 'report (1)']))
     expect(result).toBe('Report (2)')
   })
 
   it('strips existing (N) suffix and increments from 1', () => {
     // uploading "Report (1)" when "Report (1)" already exists
-    const result = resolveUploadName('Report (1)', new Set(['Report (1)']))
+    const result = resolveUploadName('Report (1)', new Set(['report (1)']))
     expect(result).toBe('Report (2)')
   })
 
@@ -260,20 +261,20 @@ describe('siblingNames', () => {
     makeFolder('f3', 'Delta', 'dr1', 'f1'), // child of f1, not root sibling
   ]
 
-  it('returns all sibling names at root level', () => {
+  it('returns all sibling names at root level (lowercased)', () => {
     const names = siblingNames(nodes, 'dr1', null)
-    expect(names).toEqual(new Set(['Alpha', 'Beta', 'Gamma']))
+    expect(names).toEqual(new Set(['alpha', 'beta', 'gamma']))
   })
 
   it('excludes the node itself when excludeId is provided', () => {
     const names = siblingNames(nodes, 'dr1', null, 'f1')
-    expect(names.has('Alpha')).toBe(false)
-    expect(names.has('Beta')).toBe(true)
+    expect(names.has('alpha')).toBe(false)
+    expect(names.has('beta')).toBe(true)
   })
 
-  it('returns names scoped to the correct parent', () => {
+  it('returns names scoped to the correct parent (lowercased)', () => {
     const names = siblingNames(nodes, 'dr1', 'f1')
-    expect(names).toEqual(new Set(['Delta']))
+    expect(names).toEqual(new Set(['delta']))
   })
 
   it('returns empty set when no siblings exist', () => {

@@ -351,6 +351,7 @@ describe('uploadFile', () => {
     const node = await useDataroomStore.getState().uploadFile(dr.id, null, file)
     expect(node.type).toBe('file')
     expect(node.name).toBe('Report')
+    if (node.type !== 'file') throw new Error('Expected FileNode')
     expect(node.mimeType).toBe('application/pdf')
   })
 
@@ -388,7 +389,7 @@ describe('uploadFile', () => {
     const dr = store.createDataroom('DR')
     const node = await useDataroomStore.getState().uploadFile(dr.id, null, makePdf('Unique.pdf'))
     // _wasRenamed is non-enumerable but still accessible
-    expect((node as Record<string, unknown>)['_wasRenamed']).toBe(false)
+    expect((node as unknown as Record<string, unknown>)['_wasRenamed']).toBe(false)
   })
 
   it('sets _wasRenamed to true when name was auto-suffixed', async () => {
@@ -396,7 +397,7 @@ describe('uploadFile', () => {
     const dr = store.createDataroom('DR')
     await useDataroomStore.getState().uploadFile(dr.id, null, makePdf('Report.pdf'))
     const second = await useDataroomStore.getState().uploadFile(dr.id, null, makePdf('Report.pdf'))
-    expect((second as Record<string, unknown>)['_wasRenamed']).toBe(true)
+    expect((second as unknown as Record<string, unknown>)['_wasRenamed']).toBe(true)
   })
 
   it('throws INVALID_FILE_TYPE for a non-PDF file', async () => {
@@ -433,7 +434,7 @@ describe('uploadFile', () => {
 
     // No collision across different folders
     expect(inF2.name).toBe('Report')
-    expect((inF2 as Record<string, unknown>)['_wasRenamed']).toBe(false)
+    expect((inF2 as unknown as Record<string, unknown>)['_wasRenamed']).toBe(false)
   })
 })
 

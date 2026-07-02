@@ -11,9 +11,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useDataroomStore } from '@/store/useDataroomStore'
 import { DataroomError } from '@/types'
-
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024 // 25 MB
-const MAX_FILE_SIZE_LABEL = '25 MB'
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL } from '@/lib/upload'
 
 interface Props {
   dataroomId: string
@@ -26,18 +24,15 @@ const UploadButton: FC<Props> = ({ dataroomId, parentId }) => {
   const [uploading, setUploading] = useState(false)
 
   const validateAndUpload = async (file: File) => {
-    // Type check: extension AND mime type
-    const isPdf =
-      file.type === 'application/pdf' ||
-      file.name.toLowerCase().endsWith('.pdf')
+    // Strict MIME type check — matches the store's validation so extension-only
+    // files (empty MIME) are rejected here before reaching the store.
+    const isPdf = file.type === 'application/pdf'
     if (!isPdf) {
       toast.error('Only PDF files are supported', {
         description: `"${file.name}" is not a PDF file.`,
       })
       return
     }
-    // The store also checks file.type strictly; extension-only files will be caught there.
-    // We surface a friendly error here rather than letting the store throw.
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
       toast.error('File too large', {

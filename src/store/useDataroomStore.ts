@@ -141,7 +141,7 @@ export const useDataroomStore = create<DataroomStore>()((set, get) => ({
     }
     const { nodes } = get()
     const siblings = siblingNames(nodes, dataroomId, parentId)
-    if (siblings.has(trimmed)) {
+    if (siblings.has(trimmed.toLowerCase())) {
       throw new DataroomError(
         'NAME_COLLISION',
         `An item named "${trimmed}" already exists here.`,
@@ -174,7 +174,7 @@ export const useDataroomStore = create<DataroomStore>()((set, get) => ({
       throw new DataroomError('NOT_FOUND', `Node ${id} not found.`)
     }
     const siblings = siblingNames(nodes, node.dataroomId, node.parentId, id)
-    if (siblings.has(trimmed)) {
+    if (siblings.has(trimmed.toLowerCase())) {
       throw new DataroomError(
         'NAME_COLLISION',
         `An item named "${trimmed}" already exists here.`,

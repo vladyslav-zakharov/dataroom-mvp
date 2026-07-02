@@ -13,8 +13,14 @@ import type { DataroomNode, FileNode, FolderNode } from '@/types'
  *   - "Report (1)" → "Report (2)" if both taken
  * This is the AUTO-SUFFIX path used for file uploads.
  */
-export function resolveUploadName(desired: string, siblingNames: Set<string>): string {
-  if (!siblingNames.has(desired)) return desired
+/**
+ * Resolves an upload name that does not collide with any sibling.
+ * `existingSiblingNames` must be a Set of lower-cased sibling names (as
+ * returned by `siblingNames()`). Comparison is case-insensitive; the returned
+ * name preserves the original casing of `desired`.
+ */
+export function resolveUploadName(desired: string, existingSiblingNames: Set<string>): string {
+  if (!existingSiblingNames.has(desired.toLowerCase())) return desired
 
   // Strip an existing " (N)" suffix so we always start from the base name
   const baseMatch = desired.match(/^(.*) \((\d+)\)$/)
@@ -22,7 +28,7 @@ export function resolveUploadName(desired: string, siblingNames: Set<string>): s
 
   let counter = 1
   let candidate = `${base} (${counter})`
-  while (siblingNames.has(candidate)) {
+  while (existingSiblingNames.has(candidate.toLowerCase())) {
     counter++
     candidate = `${base} (${counter})`
   }
@@ -102,7 +108,11 @@ export function getDescendantCounts(
   return { folders, files }
 }
 
-/** Sibling names for a given parent scope. */
+/**
+ * Sibling names for a given parent scope, lower-cased for case-insensitive
+ * collision checks — consistent with the dataroom-level name collision rules.
+ * Callers must compare with `trimmed.toLowerCase()`.
+ */
 export function siblingNames(
   nodes: DataroomNode[],
   dataroomId: string,
@@ -117,7 +127,7 @@ export function siblingNames(
           n.parentId === parentId &&
           n.id !== excludeId,
       )
-      .map((n) => n.name),
+      .map((n) => n.name.toLowerCase()),
   )
 }
 

@@ -4,14 +4,12 @@
  * validateAndUpload logic as UploadButton via a shared callback prop.
  * Shows a visible drop overlay while dragging.
  */
-import { useState, useCallback, type FC, type ReactNode, type DragEvent } from 'react'
+import { useState, useCallback, useRef, type FC, type ReactNode, type DragEvent } from 'react'
 import { UploadIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useDataroomStore } from '@/store/useDataroomStore'
 import { DataroomError } from '@/types'
-
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024 // 25 MB
-const MAX_FILE_SIZE_LABEL = '25 MB'
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL } from '@/lib/upload'
 
 interface Props {
   dataroomId: string
@@ -22,14 +20,14 @@ interface Props {
 const DropZone: FC<Props> = ({ dataroomId, parentId, children }) => {
   const uploadFile = useDataroomStore((s) => s.uploadFile)
   const [dragging, setDragging] = useState(false)
-  // Track nested drag-enter/leave with a counter to avoid flicker
-  const dragCounterRef = { current: 0 }
+  // Track nested drag-enter/leave with a stable ref to avoid flicker.
+  // Must be useRef so the counter survives re-renders (e.g. those triggered
+  // by a file drop updating the store mid-drag).
+  const dragCounterRef = useRef(0)
 
   const processFile = useCallback(
     async (file: File) => {
-      const isPdf =
-        file.type === 'application/pdf' ||
-        file.name.toLowerCase().endsWith('.pdf')
+      const isPdf = file.type === 'application/pdf'
       if (!isPdf) {
         toast.error('Only PDF files are supported', {
           description: `"${file.name}" is not a PDF file.`,
