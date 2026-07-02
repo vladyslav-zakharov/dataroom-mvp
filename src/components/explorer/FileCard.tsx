@@ -67,14 +67,14 @@ const FileCard: FC<Props> = ({ node, onClick, onRename, onDelete }) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {onRename && (
-              <DropdownMenuItem onSelect={() => onRename(node)}>
+              <DropdownMenuItem onClick={() => onRename(node)}>
                 <PencilIcon className="h-4 w-4" />
                 Rename
               </DropdownMenuItem>
             )}
             {onRename && onDelete && <DropdownMenuSeparator />}
             {onDelete && (
-              <DropdownMenuItem variant="destructive" onSelect={() => onDelete(node)}>
+              <DropdownMenuItem variant="destructive" onClick={() => onDelete(node)}>
                 <Trash2Icon className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>

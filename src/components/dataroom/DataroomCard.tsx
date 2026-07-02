@@ -79,7 +79,7 @@ const DataroomCard: FC<Props> = ({ dataroom }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onSelect={() => setRenameOpen(true)}
+                  onClick={() => setRenameOpen(true)}
                 >
                   <PencilIcon className="h-4 w-4" />
                   Rename
@@ -87,7 +87,7 @@ const DataroomCard: FC<Props> = ({ dataroom }) => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  onSelect={() => setDeleteOpen(true)}
+                  onClick={() => setDeleteOpen(true)}
                 >
                   <Trash2Icon className="h-4 w-4" />
                   Delete
